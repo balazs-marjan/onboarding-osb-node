@@ -13,7 +13,7 @@
   "scripts": {
     "watch": "tsc -w",
     "dev": "nodemon src/app.ts",
-    "start": "tsc && node dist/app.js",
+    "start": "node build/app.js",
     "build": "tsc",
     "test": "jest",
     "start:dev": "concurrently \"yarn watch\" \"yarn dev\"",
