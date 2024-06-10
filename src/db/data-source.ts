@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import dotenv from 'dotenv'
 import { DataSource } from 'typeorm'
 import { DataSourceOptions } from 'typeorm'
-import Logger from '../utils/logger'
+import path from 'path'
 
 dotenv.config()
 
@@ -19,9 +19,9 @@ const connectionOptions: DataSourceOptions = {
   synchronize: NODE_ENV === 'development',
   migrationsRun: NODE_ENV === 'development',
   logging: NODE_ENV === 'development',
-  entities: [__dirname + '/entities/**/*.{js,ts}'],
-  migrations: [__dirname + '/migrations/**/*.{js,ts}'],
-  subscribers: [__dirname + '/subscribers/**/*.{js.ts}'],
+  entities: [path.join(__dirname, 'entities/**/*.{ts,js}')],
+  migrations: [path.join(__dirname, 'migrations/**/*.{ts,js}')],
+  subscribers: [path.join(__dirname, 'subscribers/**/*.{ts,js}')],
   ssl: DB_CERT
     ? {
         rejectUnauthorized: false,
@@ -29,8 +29,6 @@ const connectionOptions: DataSourceOptions = {
       }
     : undefined,
 }
-
-Logger.debug(`DB Configuration: ${JSON.stringify(connectionOptions, null, 2)}`)
 
 const AppDataSource = new DataSource(connectionOptions)
 
