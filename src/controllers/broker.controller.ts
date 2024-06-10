@@ -14,7 +14,7 @@ export class BrokerController {
         return
       }
       const result = await this.brokerService.importCatalog(file)
-      res.status(200).send(result)
+      res.status(200).json(result)
     } catch (error) {
       Logger.error('Error importing catalog:', error)
       res

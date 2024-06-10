@@ -1,11 +1,10 @@
 import 'reflect-metadata'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import dotenv from 'dotenv'
 import Logger from './utils/logger'
 import { errorHandler } from './middlewares/error-middleware'
 import AppDataSource from './db/data-source'
 import { AppRoutes } from './routes'
-import { encodedSlashes } from './middlewares/encoded-slashes-middleware'
 import { loggerMiddleware } from './middlewares/logger-middleware'
 import { notFoundMiddleware } from './middlewares/not-found-middleware'
 
@@ -15,9 +14,6 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.json())
-
-// Use encoded slashes middleware
-app.use(encodedSlashes)
 
 // Use logger middleware
 app.use(loggerMiddleware)

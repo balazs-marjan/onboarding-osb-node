@@ -29,7 +29,7 @@ const connectionOptions: DataSourceOptions = {
     : undefined,
 }
 
-Logger.info('DB Configuration:', connectionOptions)
+Logger.debug(`DB Configuration: ${JSON.stringify(connectionOptions, null, 2)}`)
 
 const AppDataSource = new DataSource(connectionOptions)
 

@@ -8,7 +8,6 @@ interface IAMIdentity {
 class BrokerUtil {
   static PLATFORM = 'platform'
   static IBM_CLOUD = 'ibmcloud'
-  static LITE_PLAN = 'lite'
   static ORIGINATING_IDENTITY_HEADER = 'x-broker-api-originating-identity'
   static BLUEMIX_REGION_HEADER = 'x-bluemix-region'
   static DESCRIPTION = 'description'
