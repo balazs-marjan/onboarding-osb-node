@@ -15,8 +15,8 @@ export class SupportInfoServiceImpl implements SupportInfoService {
     return instanceDtos
   }
 
-  async getMetadata(): Promise<string> {
-    const metadata = {
+  async getMetadata(): Promise<Record<string, any>> {
+    return {
       BUILD_NUMBER: process.env.APP_BUILD_NUMBER,
       IAM_ENDPOINT: process.env.IAM_ENDPOINT,
       USAGE_ENDPOINT: process.env.USAGE_ENDPOINT,
@@ -24,7 +24,6 @@ export class SupportInfoServiceImpl implements SupportInfoService {
       PC_URL: process.env.PARTNER_CENTER_URL,
       IS_METERING_API_KEY_SET: process.env.METERING_API_KEY !== '',
     }
-    return JSON.stringify(metadata)
   }
 
   private mapToInstanceDto(ins: ServiceInstance): InstanceDto {

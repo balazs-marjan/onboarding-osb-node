@@ -11,7 +11,7 @@ export class UsageServiceImpl implements UsageService {
   async sendUsageData(
     resourceId: string,
     meteringPayload: MeteringPayload,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     if (!meteringPayload.start) {
       const startTime = Date.now() - 3600000 // Set start time to 1 hour ago if not provided
       meteringPayload.start = startTime
@@ -25,12 +25,9 @@ export class UsageServiceImpl implements UsageService {
     const usageApiUrl = `${this.usageEndpoint}/v4/metering/resources/${resourceId}/usage`
 
     try {
-      const response = await this.sendUsageDataToApi(
-        usageApiUrl,
-        iamAccessToken,
-        [meteringPayload],
-      )
-      return JSON.stringify(response.data)
+      return await this.sendUsageDataToApi(usageApiUrl, iamAccessToken, [
+        meteringPayload,
+      ])
     } catch (error) {
       Logger.error(`Error sending usage data: ${error}`)
       throw new Error('Error sending usage data')
@@ -43,13 +40,12 @@ export class UsageServiceImpl implements UsageService {
     data: MeteringPayload[],
   ): Promise<AxiosResponse> {
     try {
-      const response = await axios.post(url, data, {
+      return await axios.post(url, data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
-      return response
     } catch (error) {
       const axiosError = error as AxiosError
       if (axiosError.response) {

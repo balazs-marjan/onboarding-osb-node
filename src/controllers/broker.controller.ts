@@ -1,46 +1,54 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { BrokerService } from '../services/broker.service'
 import Logger from '../utils/logger'
 import BrokerUtil from '../utils/brokerUtil'
+import BadRequestError from '../errors/bad-request-error'
 
 export class BrokerController {
   constructor(private brokerService: BrokerService) {}
 
-  public importCatalog = async (req: Request, res: Response): Promise<void> => {
+  public importCatalog = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const file = req.file
       if (!file) {
-        res.status(400).send('No file provided. Please upload a catalog file.')
-        return
+        throw new BadRequestError(
+          'No file provided. Please upload a catalog file.',
+        )
       }
       const result = await this.brokerService.importCatalog(file)
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error importing catalog:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while importing catalog. Please try again later.',
-        )
+      Logger.error(`Error importing catalog: ${error}`)
+      next(error)
     }
   }
 
-  public getCatalog = async (_req: Request, res: Response): Promise<void> => {
+  public getCatalog = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const catalog = await this.brokerService.getCatalog()
+
       Logger.info('Request completed: GET /v2/catalog')
+
       res.json(catalog)
     } catch (error) {
-      Logger.error('Error retrieving catalog:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while retrieving catalog. Please try again later.',
-        )
+      Logger.error(`Error retrieving catalog: ${error}`)
+      next(error)
     }
   }
 
-  public provision = async (req: Request, res: Response): Promise<void> => {
+  public provision = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId ?? ''
       const acceptsIncomplete = req.query.accepts_incomplete === 'true'
@@ -72,18 +80,15 @@ export class BrokerController {
 
       res.status(201).json(result)
     } catch (error) {
-      Logger.error('Error provisioning service instance:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while provisioning service instance. Please try again later.',
-        )
+      Logger.error(`Error provisioning service instance: ${error}`)
+      next(error)
     }
   }
 
   public updateServiceInstance = async (
     req: Request,
     res: Response,
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
@@ -97,16 +102,16 @@ export class BrokerController {
       )
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error updating service instance:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while updating service instance. Please try again later.',
-        )
+      Logger.error(`Error updating service instance: ${error}`)
+      next(error)
     }
   }
 
-  public getState = async (req: Request, res: Response): Promise<void> => {
+  public getState = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
       const originatingIdentity =
@@ -118,16 +123,16 @@ export class BrokerController {
       )
       res.json(state)
     } catch (error) {
-      Logger.error('Error getting state:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while retrieving state. Please try again later.',
-        )
+      Logger.error(`Error getting state: ${error}`)
+      next(error)
     }
   }
 
-  public bind = async (req: Request, res: Response): Promise<void> => {
+  public bind = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
       const bindingId = req.params.bindingId
@@ -138,16 +143,16 @@ export class BrokerController {
       )
       res.status(201).json(result)
     } catch (error) {
-      Logger.error('Error binding service:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while binding service. Please try again later.',
-        )
+      Logger.error(`Error binding service: ${error}`)
+      next(error)
     }
   }
 
-  public unbind = async (req: Request, res: Response): Promise<void> => {
+  public unbind = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
       const bindingId = req.params.bindingId
@@ -159,16 +164,16 @@ export class BrokerController {
       )
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error unbinding service:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while unbinding service. Please try again later.',
-        )
+      Logger.error(`Error unbinding service: ${error}`)
+      next(error)
     }
   }
 
-  public deprovision = async (req: Request, res: Response): Promise<void> => {
+  public deprovision = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
       const acceptsIncomplete = req.query.accepts_incomplete === 'true'
@@ -192,16 +197,16 @@ export class BrokerController {
 
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error deprovisioning service instance:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while deprovisioning service instance. Please try again later.',
-        )
+      Logger.error(`Error deprovisioning service instance: ${error}`)
+      next(error)
     }
   }
 
-  public update = async (req: Request, res: Response): Promise<void> => {
+  public update = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
       const originatingIdentity =
@@ -216,18 +221,15 @@ export class BrokerController {
       )
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error updating service:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while updating service. Please try again later.',
-        )
+      Logger.error(`Error updating service: ${error}`)
+      next(error)
     }
   }
 
   public fetchLastOperation = async (
     req: Request,
     res: Response,
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const instanceId = req.params.instanceId
@@ -240,12 +242,8 @@ export class BrokerController {
       )
       res.status(200).json(result)
     } catch (error) {
-      Logger.error('Error fetching last operation:', error)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while fetching last operation. Please try again later.',
-        )
+      Logger.error(`Error fetching last operation: ${error}`)
+      next(error)
     }
   }
 }

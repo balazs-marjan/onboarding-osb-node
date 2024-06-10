@@ -8,7 +8,6 @@ export class UsageController {
   public sendUsageData = async (
     req: Request,
     res: Response,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     next: NextFunction,
   ): Promise<void> => {
     const resourceId = req.params.resourceId
@@ -22,11 +21,7 @@ export class UsageController {
       res.status(200).json(response)
     } catch (error) {
       Logger.error(`Error sending usage data: ${error}`)
-      res
-        .status(500)
-        .send(
-          'Internal Server Error while sending usage data. Please try again later.',
-        )
+      next(error)
     }
   }
 }

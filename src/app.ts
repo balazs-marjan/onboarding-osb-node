@@ -45,7 +45,7 @@ const startServer = async () => {
 
     return server
   } catch (error) {
-    Logger.error('Data Source initialization failed:', error)
+    Logger.error(`Data Source initialization failed: ${error}`)
     process.exit(1)
   }
 }
@@ -55,12 +55,12 @@ if (require.main === module) {
 }
 
 process.on('uncaughtException', error => {
-  Logger.error('Uncaught Exception:', error)
+  Logger.error(`Uncaught Exception: ${error}`)
   process.exit(1)
 })
 
 process.on('unhandledRejection', (reason, promise) => {
-  Logger.error('Unhandled Rejection at:', promise, 'reason:', reason)
+  Logger.error(`Unhandled Rejection at: ${promise} reason: ${reason}`)
   process.exit(1)
 })
 

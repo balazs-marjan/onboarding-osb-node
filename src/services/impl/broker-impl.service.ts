@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BrokerService } from '../broker.service'
 import fs from 'fs'
 import { promisify } from 'util'
@@ -13,6 +14,7 @@ import BrokerUtil from '../../utils/brokerUtil'
 import { CatalogUtil } from '../../utils/catalogUtil'
 import { ServiceInstanceStatus } from '../../enums/service-instance-status'
 import AppDataSource from '../../db/data-source'
+import NotFoundError from '../../errors/not-found-error'
 
 export class BrokerServiceImpl implements BrokerService {
   dashboardUrl: string = process.env.DASHBOARD_URL || 'http://localhost:8080'
@@ -73,7 +75,7 @@ export class BrokerServiceImpl implements BrokerService {
     details: any,
     iamId: string,
     region: string,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     try {
       const createServiceRequest = new CreateServiceInstanceRequest(details)
       createServiceRequest.instanceId = instanceId
@@ -114,11 +116,9 @@ export class BrokerServiceImpl implements BrokerService {
         )
         const responseUrl = `${BrokerUtil.DASHBOARD_URL}/provision_status?type=${displayName || this.catalog.getServiceDefinitions()[0].name}&instance_id=${instanceId}`
 
-        const response = {
+        return {
           dashboard_url: responseUrl,
         }
-
-        return JSON.stringify(response)
       } else {
         Logger.error(
           `Unidentified platform: ${createServiceRequest.context?.platform}`,
@@ -138,7 +138,7 @@ export class BrokerServiceImpl implements BrokerService {
 
     if (service && service.metadata) {
       if (
-        service.metadata.hasOwnProperty(attribute) &&
+        Object.hasOwn(service.metadata, attribute) &&
         service.metadata[attribute]
       ) {
         return service.metadata[attribute].toString()
@@ -150,20 +150,22 @@ export class BrokerServiceImpl implements BrokerService {
 
   async deprovision(
     instanceId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     planId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     serviceId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     iamId: string,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     try {
       const serviceInstanceRepository =
         AppDataSource.getRepository(ServiceInstance)
 
       await serviceInstanceRepository.delete({ instanceId })
 
-      const response = { description: 'Deprovisioned' }
-      return JSON.stringify(response)
+      return { description: 'Deprovisioned' }
     } catch (error) {
-      Logger.error('Error deprovisioning service instance:', error)
+      Logger.error(`Error deprovisioning service instance: ${error}`)
       throw new Error('Error deprovisioning service instance')
     }
   }
@@ -173,32 +175,33 @@ export class BrokerServiceImpl implements BrokerService {
     updateData: any,
     iamId: string,
     region: string,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     try {
       await getRepository(ServiceInstance).update({ instanceId }, updateData)
-      const response = {
+      return {
         message: 'Service instance updated',
         instanceId: instanceId,
       }
-      return JSON.stringify(response)
     } catch (error) {
       Logger.error('Error updating service instance:', error)
       throw new Error('Error updating service instance')
     }
   }
 
-  async lastOperation(instanceId: string, iamId: string): Promise<string> {
+  async lastOperation(
+    instanceId: string,
+    iamId: string,
+  ): Promise<Record<string, any>> {
     try {
       const operation = await getRepository(ServiceInstance).findOne({
         where: { instanceId },
       } as FindOneOptions<ServiceInstance>)
 
       if (!operation) {
-        throw new Error('Service instance not found')
+        throw new NotFoundError('Service instance not found')
       }
 
-      const response = { state: 'succeeded' }
-      return JSON.stringify(response)
+      return { state: 'succeeded' }
     } catch (error) {
       Logger.error('Error fetching last operation:', error)
       throw new Error('Error fetching last operation')
@@ -209,25 +212,27 @@ export class BrokerServiceImpl implements BrokerService {
     instanceId: string,
     updateData: any,
     iamId: string,
-  ): Promise<string> {
+  ): Promise<ServiceInstanceStateResponse> {
     try {
       const updateStateRequest = new UpdateStateRequest(updateData)
       await getRepository(ServiceInstance).update(
         { instanceId },
         { enabled: updateStateRequest.enabled },
       )
-      const response = new ServiceInstanceStateResponse({
+      return new ServiceInstanceStateResponse({
         active: updateStateRequest.enabled,
         enabled: updateStateRequest.enabled,
       })
-      return JSON.stringify(response)
     } catch (error) {
       Logger.error('Error updating instance state:', error)
       throw new Error('Error updating instance state')
     }
   }
 
-  async getState(instanceId: string, iamId: string): Promise<string> {
+  async getState(
+    instanceId: string,
+    iamId: string,
+  ): Promise<Record<string, any>> {
     try {
       const state = await getRepository(ServiceInstance).findOne({
         where: { instanceId },
@@ -237,11 +242,10 @@ export class BrokerServiceImpl implements BrokerService {
         throw new Error('Service instance not found')
       }
 
-      const response = new ServiceInstanceStateResponse({
+      return new ServiceInstanceStateResponse({
         active: false,
         enabled: false,
       })
-      return JSON.stringify(response)
     } catch (error) {
       Logger.error('Error getting instance state:', error)
       throw new Error('Error getting instance state')
@@ -252,7 +256,7 @@ export class BrokerServiceImpl implements BrokerService {
     instanceId: string,
     bindingId: string,
     details: any,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     try {
       const serviceInstance = await getRepository(ServiceInstance).findOne({
         where: { instanceId },
@@ -261,15 +265,16 @@ export class BrokerServiceImpl implements BrokerService {
       if (!serviceInstance) {
         throw new Error('Service instance not found')
       }
-      // Perform binding logic here
-      const response = {
+
+      // Perform binding logic here...
+
+      return {
         message: 'Service instance bound',
         instanceId: instanceId,
         bindingId: bindingId,
       }
-      return JSON.stringify(response)
     } catch (error) {
-      Logger.error('Error binding service instance:', error)
+      Logger.error(`Error binding service instance: ${error}`)
       throw new Error('Error binding service instance')
     }
   }
@@ -279,7 +284,7 @@ export class BrokerServiceImpl implements BrokerService {
     bindingId: string,
     planId: string,
     serviceId: string,
-  ): Promise<string> {
+  ): Promise<Record<string, any>> {
     try {
       const serviceInstance = await getRepository(ServiceInstance).findOne({
         where: { instanceId },
@@ -289,12 +294,11 @@ export class BrokerServiceImpl implements BrokerService {
         throw new Error('Service instance not found')
       }
       // Perform unbinding logic here
-      const response = {
+      return {
         message: 'Service instance unbound',
         instanceId: instanceId,
         bindingId: bindingId,
       }
-      return JSON.stringify(response)
     } catch (error) {
       Logger.error('Error unbinding service instance:', error)
       throw new Error('Error unbinding service instance')

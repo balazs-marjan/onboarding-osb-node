@@ -4,5 +4,5 @@ export interface UsageService {
   sendUsageData(
     resourceId: string,
     meteringPayload: MeteringPayload,
-  ): Promise<string>
+  ): Promise<Record<string, any>>
 }
