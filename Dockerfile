@@ -11,10 +11,10 @@ FROM node:20
 
 WORKDIR /app
 COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/build ./build
+COPY --from=builder /usr/src/app/dist ./dist
 
 ENV NODE_ENV=production
 
 EXPOSE 3001
 
-ENTRYPOINT [ "node", "build/app.js" ]
+ENTRYPOINT [ "node", "dist/app.js" ]

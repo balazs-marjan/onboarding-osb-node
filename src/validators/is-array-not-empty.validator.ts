@@ -13,6 +13,7 @@ export function IsArrayNotEmpty(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any[], args: ValidationArguments) {
+          console.log('args', args)
           return Array.isArray(value) && value.length > 0
         },
         defaultMessage(args: ValidationArguments) {

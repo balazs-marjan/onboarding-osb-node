@@ -22,12 +22,22 @@ export class BrokerServiceImpl implements BrokerService {
   private static readonly PROVISION_STATUS_API = '/provision_status?type='
   private static readonly INSTANCE_ID = '&instance_id='
 
+  constructor() {
+    this.catalog = new Catalog([])
+  }
+
   async importCatalog(file: Express.Multer.File): Promise<string> {
     const readFile = promisify(fs.readFile)
 
     try {
       const data = await readFile(file.path, { encoding: 'utf8' })
       const catalogJson = JSON.parse(data)
+
+      if (!catalogJson.services || !Array.isArray(catalogJson.services)) {
+        throw new Error(
+          'Invalid catalog format: "services" array is missing or not an array',
+        )
+      }
 
       const serviceDefinitions = catalogJson.services.map(
         (service: any) =>
@@ -45,7 +55,7 @@ export class BrokerServiceImpl implements BrokerService {
           ),
       )
       this.catalog = new Catalog(serviceDefinitions)
-      Logger.info('Imported catalog: {}', this.catalog)
+      Logger.info(`Imported catalog: ${JSON.stringify(this.catalog)}`)
 
       return JSON.stringify(catalogJson)
     } catch (error) {
@@ -297,8 +307,8 @@ export class BrokerServiceImpl implements BrokerService {
     region: string,
   ): ServiceInstance {
     const instance = new ServiceInstance()
-    instance.instanceId = request.instanceId
-    instance.name = request.context?.name
+    instance.instanceId = request.instanceId ?? ''
+    instance.name = request.context?.name ?? ''
     instance.serviceId = request.service_id
     instance.planId = request.plan_id
     instance.iamId = iamId
