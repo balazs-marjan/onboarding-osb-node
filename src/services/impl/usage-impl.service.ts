@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { MeteringPayload } from '../../models/metering-payload.interface'
 import { UsageService } from '../usage.service'
+import Logger from '../../utils/logger'
 
 export class UsageServiceImpl implements UsageService {
   private usageEndpoint: string = process.env.USAGE_ENDPOINT || ''
@@ -31,7 +32,7 @@ export class UsageServiceImpl implements UsageService {
       )
       return JSON.stringify(response.data)
     } catch (error) {
-      console.error('Error sending usage data:', error)
+      Logger.error(`Error sending usage data: ${error}`)
       throw new Error('Error sending usage data')
     }
   }
@@ -48,13 +49,13 @@ export class UsageServiceImpl implements UsageService {
           'Content-Type': 'application/json',
         },
       })
-
       return response
     } catch (error) {
       const axiosError = error as AxiosError
       if (axiosError.response) {
-        console.error('Failed with status:', axiosError.response.status)
-        console.error('Failed with response:', axiosError.response.data)
+        Logger.error(
+          `Failed with status: ${axiosError.response.status}: ${axiosError.response.data}`,
+        )
       }
       throw error
     }
