@@ -1,4 +1,4 @@
-import { Catalog } from "../models/catalog.model"
+import { Catalog } from '../models/catalog.model'
 
 export interface BrokerService {
   importCatalog(file: Express.Multer.File): Promise<Catalog>
