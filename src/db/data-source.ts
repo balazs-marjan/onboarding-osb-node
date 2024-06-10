@@ -17,10 +17,11 @@ const connectionOptions: DataSourceOptions = {
   password: DB_USER_PWD,
   database: DB_NAME,
   synchronize: NODE_ENV === 'development',
+  migrationsRun: NODE_ENV === 'development',
   logging: NODE_ENV === 'development',
-  entities: [__dirname + '/entities/**/*.ts'],
-  migrations: [__dirname + '/migrations/**/*.ts'],
-  subscribers: [__dirname + '/subscribers/**/*.ts'],
+  entities: [__dirname + '/entities/**/*.{js,ts}'],
+  migrations: [__dirname + '/migrations/**/*.{js,ts}'],
+  subscribers: [__dirname + '/subscribers/**/*.{js.ts}'],
   ssl: DB_CERT
     ? {
         rejectUnauthorized: false,

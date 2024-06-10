@@ -13,7 +13,7 @@ WORKDIR /app
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 EXPOSE 3001
 
